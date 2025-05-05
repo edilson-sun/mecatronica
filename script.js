@@ -1,65 +1,72 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Resaltar materiales
-    const btnResaltar = document.getElementById('btnResaltar');
-    const materiales = document.querySelectorAll('#listaMateriales li');
-    let isHighlighted = false;
-    let highlightTimeout;
-
-    btnResaltar.addEventListener('click', function() {
-        // Cancelar resaltado si ya está activo
-        if (isHighlighted) {
-            clearTimeout(highlightTimeout);
-            materiales.forEach(item => item.classList.remove('resaltado'));
-            isHighlighted = false;
-            btnResaltar.textContent = 'Resaltar materiales';
-            return;
-        }
-
-        // Activar resaltado
-        isHighlighted = true;
-        btnResaltar.textContent = 'Quitar resaltado';
-
-        // Quitar resaltado previo
-        materiales.forEach(item => item.classList.remove('resaltado'));
-
-        // Forzar reflow para reiniciar animaciones
-        void materiales[0].offsetWidth;
-
-        // Aplicar resaltado con efecto secuencial
-        materiales.forEach((item, index) => {
-            setTimeout(() => {
-                item.classList.add('resaltado');
-            }, index * 100);
-        });
-
-        // Desactivar después de 5 segundos
-        highlightTimeout = setTimeout(() => {
-            materiales.forEach(item => item.classList.remove('resaltado'));
-            isHighlighted = false;
-            btnResaltar.textContent = 'Resaltar materiales';
-        }, 5000);
+    // Sistema de pestañas
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const tabId = this.getAttribute('data-tab');
+        
+        // Remover clase active de todos los botones y contenidos
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // Agregar clase active al botón clickeado y su contenido correspondiente
+        this.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+      });
     });
-
-    // Feedback del video
-    const btnFeedback = document.getElementById('btnFeedback');
-    btnFeedback.addEventListener('click', function() {
-        const respuesta = confirm("¿Te gustó el video explicativo?");
-        if (respuesta) {
-            alert("¡Gracias por tu feedback! 😊");
-        } else {
-            alert("Lamentamos que no te haya gustado. ¿Tienes alguna sugerencia?");
-        }
+    
+    // Botón "Volver arriba"
+    const backToTopButton = document.getElementById('back-to-top');
+    
+    window.addEventListener('scroll', function() {
+      if (window.pageYOffset > 300) {
+        backToTopButton.classList.add('visible');
+      } else {
+        backToTopButton.classList.remove('visible');
+      }
     });
-
-    // Control de video
-    const video = document.querySelector('video');
-    if (video) {
-        video.addEventListener('play', () => {
-            console.log('Video iniciado');
+    
+    // Smooth scroll para enlaces internos
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 80,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+    
+    // Animación al hacer scroll
+    const animateOnScroll = function() {
+      const elements = document.querySelectorAll('.card, .benefit-item');
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
         });
-
-        video.addEventListener('ended', () => {
-            console.log('Video finalizado');
-        });
-    }
-});
+      }, {
+        threshold: 0.1
+      });
+      
+      elements.forEach(element => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(element);
+      });
+    };
+    
+    setTimeout(animateOnScroll, 100);
+  });
